@@ -6,14 +6,14 @@ public class JumpState : AbilityState
 {
     public JumpState(Player player, StateMachine stateMachine) : base(player, stateMachine)
     {
+
     }
 
     public override void Enter()
     {
         base.Enter();
         Debug.Log("Enter JumpState");
-        Jump();
-        isAbilityDone = true;
+        player.amountOfJumpLeft--;
     }
 
     public override void Exit()
@@ -29,10 +29,15 @@ public class JumpState : AbilityState
     public override void PhysicalUpdate()
     {
         base.PhysicalUpdate();
+        Jump();
+        isAbilityDone = true;
     }
 
-    void Jump()
+    private void Jump()
     {
-        player.playerRB.velocity = new Vector3(0f, player.jumpHeight, 0f);
+        player.playerRB.velocity = new Vector3(player.currentVelocity.x, 0f, player.currentVelocity.z);
+        player.playerRB.velocity += Vector3.up * player.jumpHeight;
     }
+
+    public void ResetJumpCount() => player.amountOfJumpLeft = 2;
 }

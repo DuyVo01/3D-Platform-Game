@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class MoveState : GroundState
 {
-    Vector3 move;
+    Vector3 moveDirection;
+    public Vector3 slopMoveDirection;
     public MoveState(Player player, StateMachine stateMachine) : base(player, stateMachine)
     {
     }
@@ -18,34 +19,58 @@ public class MoveState : GroundState
     public override void Exit()
     {
         base.Exit();
-        player.playerRB.velocity = Vector3.zero;
     }
 
     public override void LogicalUpdate()
     {
         base.LogicalUpdate();
-        if (movementInput.x == 0 && movementInput.y == 0)
+        if (movementInput == Vector2.zero)
         {
             stateMachine.ChangeState(player.idleState);
         }
-
-        move = new Vector3(movementInput.x, 0, movementInput.y);
-        move = move.x * player.cameraTransform.right.normalized + move.z * player.cameraTransform.forward.normalized;
-        move.y = 0f;
-
+        else
+        {
+            //MovementDirectionWithCamera();
+            //player.MovementDirRelatedToCameraDir();
+            //SlopMoveDirection();    
+            player.PlayerRotation(movementInput);
+        }  
     }
 
     public override void PhysicalUpdate()
     {
         base.PhysicalUpdate();
-        player.PlayerRotation(movementInput);
-        Move(move);
-        
+        if (!player.isOnSlope)
+        {
+            Move(player.movementDirection);
+        }
+        else
+        {
+            SlopeMove();
+        }     
     }
 
-    public void Move(Vector3 move)
+    //THIS IS OLD METHOD--------------------------------------------
+    //private void MovementDirectionWithCamera()
+    //{
+    //    moveDirection = new Vector3(movementInput.x, 0f, movementInput.y);
+    //    moveDirection.Normalize();
+    //    moveDirection = moveDirection.x * player.cameraTransform.right.normalized + moveDirection.z * player.cameraTransform.forward.normalized;
+    //}
+
+    public void SlopMoveDirection()
+    {
+        slopMoveDirection = Vector3.ProjectOnPlane(player.movementDirection, player.slopeHit.normal).normalized;
+        Debug.DrawRay(player.slopeHit.point, slopMoveDirection, Color.black);
+    }
+
+    private void Move(Vector3 move)
     {
         Vector3 finalMove = move * player.movementSpeed * Time.deltaTime;
-        player.playerRB.velocity = new Vector3(finalMove.x, player.currentVelocity.y, finalMove.z);
+        player.playerRB.velocity = new Vector3(finalMove.x, 0f, finalMove.z); 
+    } 
+    private void SlopeMove()
+    {
+        player.playerRB.velocity = player.slopeMovementDirection * player.movementSpeed * Time.deltaTime;
     }
 }

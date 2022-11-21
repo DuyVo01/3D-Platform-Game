@@ -12,7 +12,7 @@ public class IdleState : GroundState
     public override void Enter()
     {
         base.Enter();
-        
+        player.playerRB.velocity = Vector3.zero;
         Debug.Log("Enter IdleState");
     }
 

@@ -13,6 +13,8 @@ public class GroundState : State
     public override void Enter()
     {
         base.Enter();
+        player.playerRB.velocity = new Vector3(player.currentVelocity.x, 0f, player.currentVelocity.z);
+        player.jumpState.ResetJumpCount();
     }
 
     public override void Exit()
@@ -24,11 +26,19 @@ public class GroundState : State
     {
         base.LogicalUpdate();
         movementInput = player.inputHandler.rawMovementInput;
-        isJumping = player.inputHandler.isJumping;
+        isJumping = player.inputHandler.isJump;
         if (isJumping && player.isGrounded)
         {
-            stateMachine.ChangeState(player.jumpState);
+            //player.inputHandler.UsedJump();
+            stateMachine.ChangeState(player.jumpState);         
+        } else if (!player.isGrounded)
+        {
+            stateMachine.ChangeState(player.inAirState);
+        } else if (player.inputHandler.isDash)
+        {
+            stateMachine.ChangeState(player.dashState);
         }
+        
         
     }
 

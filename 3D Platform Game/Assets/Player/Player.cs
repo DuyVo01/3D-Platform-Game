@@ -12,18 +12,33 @@ public class Player : MonoBehaviour
     public InputHandler inputHandler;
     public Rigidbody playerRB;
     public Transform cameraTransform;
-    //public CharacterController controller;
+    public CapsuleCollider playerCapsuleCollider;
+    
 
     public float movementSpeed;
+    public Vector3 movementDirection;
+    public Vector3 slopeMovementDirection;
     public float rotationSpeed;
+    public float dashSpeed;
+
+    //Jump Variables
     public float jumpHeight;
+    public float holdingJumpHeight;
+    public float fallJumpMultiplier;
+    public float lowJumpMultiplier;
+    public int amountOfJumpLeft;
+
     public Vector3 currentVelocity;
     public bool isGrounded;
+    public bool isOnSlope;
     public float groundCheckRadius;
+    public RaycastHit slopeHit;
 
     public IdleState idleState;
     public MoveState moveState;
     public JumpState jumpState;
+    public InAirState inAirState;
+    public DashState dashState;
 
     // Start is called before the first frame update
     private void Awake()
@@ -31,6 +46,7 @@ public class Player : MonoBehaviour
         inputHandler = GetComponent<InputHandler>();
         playerRB = GetComponent<Rigidbody>();
         cameraTransform = Camera.main.transform;
+        playerCapsuleCollider = GetComponent<CapsuleCollider>();
         //controller = GetComponent<CharacterController>();
     }
     void Start()
@@ -39,6 +55,8 @@ public class Player : MonoBehaviour
         idleState = new IdleState(this, stateMachine);
         moveState = new MoveState(this, stateMachine);
         jumpState = new JumpState(this, stateMachine);
+        inAirState = new InAirState(this, stateMachine);
+        dashState = new DashState(this, stateMachine);
 
         stateMachine.Initialize(idleState);
     }
@@ -47,6 +65,9 @@ public class Player : MonoBehaviour
     void Update()
     {
         GroundCheck();
+        OnSlope();
+        MovementDirRelatedToCameraDir();
+        SlopMoveDirection();
         currentVelocity = playerRB.velocity;
         stateMachine.LogicalUpdate();
     }
@@ -56,16 +77,50 @@ public class Player : MonoBehaviour
         stateMachine.PhysicalUpdate();
     }
 
+    public void MovementDirRelatedToCameraDir()
+    {
+        movementDirection = new Vector3(inputHandler.rawMovementInput.x, 0f, inputHandler.rawMovementInput.y);
+        movementDirection.Normalize();
+        movementDirection = movementDirection.x * cameraTransform.right.normalized + movementDirection.z * cameraTransform.forward.normalized;
+        movementDirection.y = 0f;
+    }
+
+    public void SlopMoveDirection()
+    {
+        slopeMovementDirection = Vector3.ProjectOnPlane(movementDirection, slopeHit.normal).normalized;
+        Debug.DrawRay(slopeHit.point, slopeMovementDirection, Color.black);
+    }
+
     public void PlayerRotation(Vector2 movementInput)
     {
-        float targetAngle = Mathf.Atan2(-movementInput.y, movementInput.x) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y; 
-        Quaternion rotation = Quaternion.Euler(0, targetAngle, 0);
+        float targetAngle = Mathf.Atan2(-movementInput.y, movementInput.x) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
+        Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
         transform.rotation = Quaternion.Lerp(transform.rotation, rotation, rotationSpeed);
     }
 
     public void GroundCheck()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, whatIsGround);
+    }
+
+    public void OnSlope()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerCapsuleCollider.height / 2 + 0.5f))
+        {
+            Debug.DrawRay(slopeHit.point, slopeHit.normal, Color.red);
+            if(slopeHit.normal != Vector3.up)
+            {
+                isOnSlope = true;
+            }
+            else
+            {
+                isOnSlope = false;
+            }
+        }
+        else
+        {
+            isOnSlope = false;
+        } 
     }
 
     private void OnDrawGizmos()

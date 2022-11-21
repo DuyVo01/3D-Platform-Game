@@ -5,6 +5,8 @@ using UnityEngine;
 public class AbilityState : State
 {
     protected bool isAbilityDone;
+    private bool isGrounded;
+
     public AbilityState(Player player, StateMachine stateMachine) : base(player, stateMachine)
     {
     }
@@ -23,6 +25,18 @@ public class AbilityState : State
     public override void LogicalUpdate()
     {
         base.LogicalUpdate();
+        isGrounded = player.isGrounded;
+        if (isAbilityDone)
+        {
+            if(isGrounded && player.currentVelocity.y <= 0)
+            {
+                stateMachine.ChangeState(player.idleState);
+            }
+            else 
+            {
+                stateMachine.ChangeState(player.inAirState);
+            }
+        }
     }
 
     public override void PhysicalUpdate()
