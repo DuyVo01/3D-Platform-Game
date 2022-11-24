@@ -7,7 +7,7 @@ public class AbilityState : State
     protected bool isAbilityDone;
     private bool isGrounded;
 
-    public AbilityState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public AbilityState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
     }
 
@@ -28,7 +28,8 @@ public class AbilityState : State
         isGrounded = player.isGrounded;
         if (isAbilityDone)
         {
-            if(isGrounded && player.currentVelocity.y <= 0)
+            player.playerAnimator.SetBool("Stop", false);
+            if (isGrounded && player.currentVelocity.y <= 0.01f)
             {
                 stateMachine.ChangeState(player.idleState);
             }

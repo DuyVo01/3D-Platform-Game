@@ -10,7 +10,7 @@ public class InAirState : State
     private Vector2 movementInput;
     private Vector3 moveDirection;
 
-    public InAirState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public InAirState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
     }
 
@@ -18,12 +18,14 @@ public class InAirState : State
     {
         base.Enter();
         player.inputHandler.UsedJump();
+        player.playerAnimator.SetBool(animationName, true);
         Debug.Log("Enter InAirState");
     }
 
     public override void Exit()
     {
         base.Exit();
+        player.playerAnimator.SetBool(animationName, false);
     }
 
     public override void LogicalUpdate()
@@ -36,7 +38,7 @@ public class InAirState : State
 
         if (isGrounded && player.currentVelocity.y <= 0.01f)
         {
-            stateMachine.ChangeState(player.idleState);
+            stateMachine.ChangeState(player.landState);
         }
         else
         {
@@ -52,34 +54,41 @@ public class InAirState : State
             {
                 stateMachine.ChangeState(player.jumpState);
             }
+
+            player.playerAnimator.SetFloat("VelocityY", player.currentVelocity.y);
         }   
     }
 
     public override void PhysicalUpdate()
     {
         base.PhysicalUpdate();        
-        AirMove(player.movementDirection);
+        AirMoveAlternative(player.movementDirection);
         if (player.playerRB.velocity.y < 0 && !isGrounded)
         {
             player.playerRB.velocity += Vector3.up * Physics.gravity.y * (player.fallJumpMultiplier - 1) * Time.deltaTime;
         }
-        else if (!isHoldingJump && player.playerRB.velocity.y > 0 && !isGrounded)
+        if (!isHoldingJump && !isGrounded)
         {
             player.playerRB.velocity += Vector3.up * Physics.gravity.y * (player.lowJumpMultiplier - 1) * Time.deltaTime;
         }
+
+
     }
 
-    //private void MovementDirectionWithCamera()
+    //******************OLD Move Method****************************
+    //private void AirMove(Vector3 move)
     //{
-    //    moveDirection = new Vector3(movementInput.x, 0f, movementInput.y);
-    //    moveDirection.Normalize();
-    //    moveDirection = moveDirection.x * player.cameraTransform.right.normalized + moveDirection.z * player.cameraTransform.forward.normalized;
+    //    Vector3 finalMove = move * player.movementSpeed * Time.deltaTime;
+    //    player.playerRB.velocity = new Vector3(finalMove.x, player.currentVelocity.y, finalMove.z);
     //}
 
-    private void AirMove(Vector3 move)
+    private void AirMoveAlternative(Vector3 move)
     {
-        Vector3 finalMove = move * player.movementSpeed * Time.deltaTime;
-        player.playerRB.velocity = new Vector3(finalMove.x, player.currentVelocity.y, finalMove.z);
+        Vector3 finalMove = player.movementSpeed * Time.deltaTime * move;
+        //player.playerRB.velocity = new Vector3(finalMove.x, player.currentVelocity.y, finalMove.z);
+        Vector3 playerHorizontalVelocity = player.playerRB.velocity;
+        playerHorizontalVelocity.y = 0f;
+        player.playerRB.AddForce(finalMove - playerHorizontalVelocity, ForceMode.VelocityChange);
     }
 
 }

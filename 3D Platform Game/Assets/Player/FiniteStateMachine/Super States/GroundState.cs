@@ -6,7 +6,7 @@ public class GroundState : State
 {
     public Vector2 movementInput;
     public bool isJumping;
-    public GroundState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public GroundState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
     }
 
@@ -27,6 +27,7 @@ public class GroundState : State
         base.LogicalUpdate();
         movementInput = player.inputHandler.rawMovementInput;
         isJumping = player.inputHandler.isJump;
+
         if (isJumping && player.isGrounded)
         {
             //player.inputHandler.UsedJump();
@@ -34,17 +35,15 @@ public class GroundState : State
         } else if (!player.isGrounded)
         {
             stateMachine.ChangeState(player.inAirState);
-        } else if (player.inputHandler.isDash)
-        {
-            stateMachine.ChangeState(player.dashState);
-        }
+        } 
         
-        
+
     }
 
     public override void PhysicalUpdate()
     {
         base.PhysicalUpdate();
+        player.FloatingCollider();
     }
 }
    

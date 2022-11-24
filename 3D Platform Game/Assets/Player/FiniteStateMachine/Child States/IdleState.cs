@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class IdleState : GroundState
 {
-    public IdleState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public IdleState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
 
     }
@@ -12,6 +12,7 @@ public class IdleState : GroundState
     public override void Enter()
     {
         base.Enter();
+        player.playerAnimator.SetBool(animationName, true);
         player.playerRB.velocity = Vector3.zero;
         Debug.Log("Enter IdleState");
     }
@@ -19,7 +20,7 @@ public class IdleState : GroundState
     public override void Exit()
     {
         base.Exit();
-        
+        player.playerAnimator.SetBool(animationName, false);
     }
 
     public override void LogicalUpdate()

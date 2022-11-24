@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class JumpState : AbilityState
 {
-    public JumpState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public JumpState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
 
     }
@@ -13,12 +13,14 @@ public class JumpState : AbilityState
     {
         base.Enter();
         Debug.Log("Enter JumpState");
+        player.playerAnimator.SetBool(animationName, true);
         player.amountOfJumpLeft--;
     }
 
     public override void Exit()
     {
         base.Exit();
+        player.playerAnimator.SetBool(animationName, false);
     }
 
     public override void LogicalUpdate()

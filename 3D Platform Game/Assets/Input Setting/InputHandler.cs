@@ -19,7 +19,7 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         CheckJump();
-        //CheckHoldingJump();
+        CheckHoldingJump();
     }
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -34,6 +34,7 @@ public class InputHandler : MonoBehaviour
             isJump = true;
             isHoldingJump = true;
             jumpBufferTime = Time.time;
+            jumpHoldTime = Time.time;
         }
 
         if (context.canceled)
@@ -47,6 +48,10 @@ public class InputHandler : MonoBehaviour
         if (context.started)
         {
             isDash = true;
+        }
+        if (context.canceled)
+        {
+            isDash = false;
         }
     }
 

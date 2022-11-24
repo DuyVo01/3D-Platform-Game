@@ -6,19 +6,24 @@ public class MoveState : GroundState
 {
     Vector3 moveDirection;
     public Vector3 slopMoveDirection;
-    public MoveState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+    public MoveState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
     }
 
     public override void Enter()
     {
         base.Enter();
+
+        player.playerAnimator.SetBool(animationName, true);
         Debug.Log("Enter MoveState");
+        
     }
 
     public override void Exit()
     {
         base.Exit();
+         
+        player.playerAnimator.SetBool(animationName, false);
     }
 
     public override void LogicalUpdate()
@@ -28,11 +33,12 @@ public class MoveState : GroundState
         {
             stateMachine.ChangeState(player.idleState);
         }
-        else
+        else if (player.inputHandler.isDash)
         {
-            //MovementDirectionWithCamera();
-            //player.MovementDirRelatedToCameraDir();
-            //SlopMoveDirection();    
+            stateMachine.ChangeState(player.dashState);
+        }
+        else
+        {   
             player.PlayerRotation(movementInput);
         }  
     }
@@ -40,23 +46,10 @@ public class MoveState : GroundState
     public override void PhysicalUpdate()
     {
         base.PhysicalUpdate();
-        if (!player.isOnSlope)
-        {
-            Move(player.movementDirection);
-        }
-        else
-        {
-            SlopeMove();
-        }     
+
+        Move(player.movementDirection);
     }
 
-    //THIS IS OLD METHOD--------------------------------------------
-    //private void MovementDirectionWithCamera()
-    //{
-    //    moveDirection = new Vector3(movementInput.x, 0f, movementInput.y);
-    //    moveDirection.Normalize();
-    //    moveDirection = moveDirection.x * player.cameraTransform.right.normalized + moveDirection.z * player.cameraTransform.forward.normalized;
-    //}
 
     public void SlopMoveDirection()
     {
@@ -65,12 +58,15 @@ public class MoveState : GroundState
     }
 
     private void Move(Vector3 move)
-    {
-        Vector3 finalMove = move * player.movementSpeed * Time.deltaTime;
-        player.playerRB.velocity = new Vector3(finalMove.x, 0f, finalMove.z); 
+    {  
+        Vector3 finalMove = player.movementSpeed * Time.deltaTime * move;
+        //player.playerRB.velocity = new Vector3(finalMove.x, player.currentVelocity.y, finalMove.z);
+        Vector3 playerHorizontalVelocity = player.playerRB.velocity;
+        playerHorizontalVelocity.y = 0f;
+        player.playerRB.AddForce(finalMove - playerHorizontalVelocity, ForceMode.VelocityChange);
     } 
-    private void SlopeMove()
-    {
-        player.playerRB.velocity = player.slopeMovementDirection * player.movementSpeed * Time.deltaTime;
-    }
+    //private void SlopeMove()
+    //{
+    //    player.playerRB.velocity = player.slopeMovementDirection * player.movementSpeed * Time.deltaTime;
+    //}
 }
