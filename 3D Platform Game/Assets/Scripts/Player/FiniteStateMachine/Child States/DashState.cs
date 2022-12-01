@@ -2,11 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class GhostContainer
+{
+    public CopyDemBones ghost;
+    public float life = 1;
+
+    public GhostContainer(CopyDemBones ghost, float life)
+    {
+        this.ghost = ghost;
+        this.life = life;
+    }
+}
+
 public class DashState : AbilityState
 {
     Vector3 dashDirection;
     float dashStartTime;
     Coroutine ResetDash;
+
 
     public DashState(Player player, StateMachine stateMachine, string animationName) : base(player, stateMachine, animationName)
     {
@@ -53,6 +66,7 @@ public class DashState : AbilityState
         base.LogicalUpdate();
 
         dashDirection = player.slopeMovementDirection;
+
         
     }
 
@@ -99,8 +113,6 @@ public class DashState : AbilityState
         }
         
     }
-
-    
 }
    
 

@@ -26,7 +26,7 @@ public class Stars : MonoBehaviour
 
             transform.RotateAround((player.position + Vector3.up * 2f) + ((player.position + Vector3.up * 2f) - transform.position) , new Vector3(0, 1, 0), Time.deltaTime * 550f);
 
-            transform.position = Vector3.Lerp(transform.position, player.position + Vector3.up * 0.75f, Time.deltaTime * 0.7f);
+            transform.position = Vector3.Lerp(transform.position, player.position + Vector3.up * 0.75f, Time.deltaTime * 2f);
 
             transform.localScale -= Time.deltaTime * new Vector3(0.8f, 0.8f, 0.8f);
 
