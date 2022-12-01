@@ -1,4 +1,10 @@
 # 3D-Platform-Game
+Changelogs 01/12/2022
+  - Fixed bugs related to movement system, now everything should work without problems
+  - Improved and optimized performance.
+  - Added collectibles with animations and basic VFXs, each type of collectibles has different response upon collision.
+  
+
 Changelogs 24/11/2022 - Third Update of the development process:
   - Improved Movement system, it's hardly noticable, but the character now moves more precisely.
   - Changed how moving on slope/stairs works, there were problems preventing the character from moving smoothly and precisely, they have been fixed.
